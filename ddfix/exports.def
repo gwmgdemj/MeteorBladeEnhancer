@@ -1,0 +1,11 @@
+LIBRARY ddfix
+EXPORTS
+
+DirectDrawCreate=FakeDirectDrawCreate
+DirectDrawEnumerateA=FakeDirectDrawEnumerateA
+
+AcquireDDThreadLock=FakeAcquireLock
+D3DParseUnknownCommand=FakeParseUnknown
+DDInternalLock=FakeInternalLock
+DDInternalUnlock=FakeInternalUnlock
+ReleaseDDThreadLock=FakeReleaseLock
