@@ -39,8 +39,8 @@ m_IDirect3DTexture2::m_IDirect3DTexture2(IDirect3DTexture2 *aOriginal, m_IDirect
 			m_tex9Handle = ND3D9::D3D9Context::Instance()->CreateTexture9(
 				desc.dwWidth,
 				desc.dwHeight,
-				mipmapCount,
-				mipmapCount ? 0 : D3DUSAGE_AUTOGENMIPMAP,
+				mipmapCount == 0 ? 1 : mipmapCount,
+				mipmapCount ? 0 : 0,
 				ND3D9::D3DFMT_A8R8G8B8,
 				ND3D9::D3DPOOL_MANAGED);
 		}		

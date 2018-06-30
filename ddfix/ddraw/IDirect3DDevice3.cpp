@@ -74,7 +74,7 @@ static void GetMagFilterD9(D3DTEXTUREMAGFILTER d6filter, ND3D9::D3DTEXTUREFILTER
 
 static void GetMagFilterD6(D3DTEXTUREMAGFILTER& d6filter, ND3D9::D3DTEXTUREFILTERTYPE d9filter)
 {
-	switch (d6filter)
+	switch (d9filter)
 	{
 	case ND3D9::D3DTEXF_POINT:
 		d6filter = D3DTFG_POINT;
@@ -115,7 +115,7 @@ static void GetMinFilterD9(D3DTEXTUREMINFILTER d6filter, ND3D9::D3DTEXTUREFILTER
 
 static void GetMinFilterD6(D3DTEXTUREMINFILTER& d6filter, ND3D9::D3DTEXTUREFILTERTYPE d9filter)
 {
-	switch (d6filter)
+	switch (d9filter)
 	{
 	case ND3D9::D3DTEXF_POINT:
 		d6filter = D3DTFN_POINT;
@@ -136,6 +136,9 @@ static void GetMipFilterD9(D3DTEXTUREMIPFILTER d6filter, ND3D9::D3DTEXTUREFILTER
 {
 	switch (d6filter)
 	{
+	case D3DTFP_NONE:
+		d9filter = ND3D9::D3DTEXF_NONE;
+		break;
 	case D3DTFP_POINT:
 		d9filter = ND3D9::D3DTEXF_POINT;
 		break;
@@ -150,8 +153,11 @@ static void GetMipFilterD9(D3DTEXTUREMIPFILTER d6filter, ND3D9::D3DTEXTUREFILTER
 
 static void GetMipFilterD6(D3DTEXTUREMIPFILTER& d6filter, ND3D9::D3DTEXTUREFILTERTYPE d9filter)
 {
-	switch (d6filter)
+	switch (d9filter)
 	{
+	case ND3D9::D3DTEXF_NONE:
+		d6filter = D3DTFP_NONE;
+		break;
 	case ND3D9::D3DTEXF_POINT:
 		d6filter = D3DTFP_POINT;
 		break;
@@ -571,29 +577,30 @@ HRESULT m_IDirect3DDevice3::SetLightState(D3DLIGHTSTATETYPE a, DWORD b)
 HRESULT m_IDirect3DDevice3::SetTransform(D3DTRANSFORMSTATETYPE tsType, LPD3DMATRIX matrix)
 {
 	HRESULT hr = DDERR_GENERIC;
+	auto matrix9 = (ND3D9::D3DXMATRIX*)matrix;
 	auto device9 = ND3D9::D3D9Context::Instance()->GetDevice();
 	switch (tsType)
 	{
 	case D3DTRANSFORMSTATE_WORLD:
-		hr = device9->SetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD, matrix);
+		hr = device9->SetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_VIEW:
-		hr = device9->SetTransform(ND3D9::D3DTS_VIEW, matrix);
+		hr = device9->SetTransform(ND3D9::D3DTS_VIEW, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_PROJECTION:
-		hr = device9->SetTransform(ND3D9::D3DTS_PROJECTION, matrix);
+		hr = device9->SetTransform(ND3D9::D3DTS_PROJECTION, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_WORLD1:
-		hr = device9->SetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD1, matrix);
+		hr = device9->SetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD1, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_WORLD2:
-		hr = device9->SetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD2, matrix);
+		hr = device9->SetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD2, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_WORLD3:
-		hr = device9->SetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD3, matrix);
+		hr = device9->SetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD3, matrix9);
 		break;
 	default:
-		hr = device9->SetTransform((ND3D9::D3DTRANSFORMSTATETYPE)tsType, matrix);
+		hr = device9->SetTransform((ND3D9::D3DTRANSFORMSTATETYPE)tsType, matrix9);
 		break;
 	}
 	return hr;
@@ -602,29 +609,30 @@ HRESULT m_IDirect3DDevice3::SetTransform(D3DTRANSFORMSTATETYPE tsType, LPD3DMATR
 HRESULT m_IDirect3DDevice3::GetTransform(D3DTRANSFORMSTATETYPE tsType, LPD3DMATRIX matrix)
 {
 	HRESULT hr = DDERR_GENERIC;
+	auto matrix9 = (ND3D9::D3DXMATRIX*)matrix;
 	auto device9 = ND3D9::D3D9Context::Instance()->GetDevice();
 	switch (tsType)
 	{
 	case D3DTRANSFORMSTATE_WORLD:
-		hr = device9->GetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD, matrix);
+		hr = device9->GetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_VIEW:
-		hr = device9->GetTransform(ND3D9::D3DTS_VIEW, matrix);
+		hr = device9->GetTransform(ND3D9::D3DTS_VIEW, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_PROJECTION:
-		hr = device9->GetTransform(ND3D9::D3DTS_PROJECTION, matrix);
+		hr = device9->GetTransform(ND3D9::D3DTS_PROJECTION, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_WORLD1:
-		hr = device9->GetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD1, matrix);
+		hr = device9->GetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD1, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_WORLD2:
-		hr = device9->GetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD2, matrix);
+		hr = device9->GetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD2, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_WORLD3:
-		hr = device9->GetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD3, matrix);
+		hr = device9->GetTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD3, matrix9);
 		break;
 	default:
-		hr = device9->GetTransform((ND3D9::D3DTRANSFORMSTATETYPE)tsType, matrix);
+		hr = device9->GetTransform((ND3D9::D3DTRANSFORMSTATETYPE)tsType, matrix9);
 		break;
 	}
 	return hr;
@@ -633,29 +641,30 @@ HRESULT m_IDirect3DDevice3::GetTransform(D3DTRANSFORMSTATETYPE tsType, LPD3DMATR
 HRESULT m_IDirect3DDevice3::MultiplyTransform(D3DTRANSFORMSTATETYPE tsType, LPD3DMATRIX matrix)
 {
 	HRESULT hr = DDERR_GENERIC;
+	auto matrix9 = (ND3D9::D3DXMATRIX*)matrix;
 	auto device9 = ND3D9::D3D9Context::Instance()->GetDevice();
 	switch (tsType)
 	{
 	case D3DTRANSFORMSTATE_WORLD:
-		hr = device9->MultiplyTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD, matrix);
+		hr = device9->MultiplyTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_VIEW:
-		hr = device9->MultiplyTransform(ND3D9::D3DTS_VIEW, matrix);
+		hr = device9->MultiplyTransform(ND3D9::D3DTS_VIEW, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_PROJECTION:
-		hr = device9->MultiplyTransform(ND3D9::D3DTS_PROJECTION, matrix);
+		hr = device9->MultiplyTransform(ND3D9::D3DTS_PROJECTION, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_WORLD1:
-		hr = device9->MultiplyTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD1, matrix);
+		hr = device9->MultiplyTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD1, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_WORLD2:
-		hr = device9->MultiplyTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD2, matrix);
+		hr = device9->MultiplyTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD2, matrix9);
 		break;
 	case D3DTRANSFORMSTATE_WORLD3:
-		hr = device9->MultiplyTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD3, matrix);
+		hr = device9->MultiplyTransform((ND3D9::D3DTRANSFORMSTATETYPE)D3DTS_WORLD3, matrix9);
 		break;
 	default:
-		hr = device9->MultiplyTransform((ND3D9::D3DTRANSFORMSTATETYPE)tsType, matrix);
+		hr = device9->MultiplyTransform((ND3D9::D3DTRANSFORMSTATETYPE)tsType, matrix9);
 		break;
 	}
 	return hr;
@@ -836,7 +845,7 @@ HRESULT m_IDirect3DDevice3::GetTextureStageState(DWORD dwStage, D3DTEXTURESTAGES
 	{
 		ND3D9::D3DTEXTUREFILTERTYPE d9Value;
 		hr = device9->GetSamplerState(0, ND3D9::D3DSAMP_MINFILTER, (DWORD*)&d9Value);
-		GetMinFilterD9((D3DTEXTUREMINFILTER&)*pValue, d9Value);
+		GetMinFilterD6((D3DTEXTUREMINFILTER&)*pValue, d9Value);
 		
 		break;
 	}
@@ -844,7 +853,7 @@ HRESULT m_IDirect3DDevice3::GetTextureStageState(DWORD dwStage, D3DTEXTURESTAGES
 	{
 		ND3D9::D3DTEXTUREFILTERTYPE d9Value;
 		hr = device9->GetSamplerState(0, ND3D9::D3DSAMP_MIPFILTER, (DWORD*)&d9Value);
-		GetMipFilterD9((D3DTEXTUREMIPFILTER&)*pValue, d9Value);
+		GetMipFilterD6((D3DTEXTUREMIPFILTER&)*pValue, d9Value);
 		
 		break;
 	}

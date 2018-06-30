@@ -25,9 +25,18 @@ namespace ND3D9
 #undef D3DERR_CONFLICTINGTEXTUREPALETTE
 #define DIRECT3D_VERSION 0x0900
 
-#include <d3d9.h>
+#undef D3DMATRIX_DEFINED
+#include <d3dx9.h>
 #include "Common/SmartPointer.h"
+}
 
+namespace ND3DX9
+{
+
+}
+
+namespace ND3D9
+{
 	using Resource9Handle = int;
 
 	class D3D9Context;
@@ -68,6 +77,8 @@ namespace ND3D9
 		Resource9Handle CreateZBufferSurface9(int width, int height, D3DFORMAT format, D3DMULTISAMPLE_TYPE multiSample, DWORD multisampleQuality, BOOL discard);
 		Resource9Handle GetBackBuffer9();
 		Resource9Handle CreateTexture9(int width, int height, UINT levels, DWORD usage, D3DFORMAT format, D3DPOOL pool);
+		Resource9Handle CreateRenderTarget(int width, int height, D3DFORMAT format, D3DMULTISAMPLE_TYPE multiSample, DWORD multisampleQuality, BOOL lockable);
+		Resource9Handle CreateSprite();
 
 		template<class T>
 		SmartPtr<T> GetResource9(Resource9Handle handle, std::string* pType)

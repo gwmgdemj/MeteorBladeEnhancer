@@ -48,8 +48,10 @@ private:
 class ZBufferSurface9Factory final : public IResource9Factory
 {
 public:
-	ZBufferSurface9Factory(D3DFORMAT format, D3DMULTISAMPLE_TYPE multiSample, DWORD multisampleQuality, BOOL discard)
-		: m_format(format)
+	ZBufferSurface9Factory(int width, int height, D3DFORMAT format, D3DMULTISAMPLE_TYPE multiSample, DWORD multisampleQuality, BOOL discard)
+		: m_width(width)
+		, m_height(height)
+		, m_format(format)
 		, m_multiSample(multiSample)
 		, m_multisampleQuality(multisampleQuality)
 		, m_discard(discard)
@@ -60,10 +62,7 @@ public:
 	virtual IUnknown* Create(D3D9Context* context) const override
 	{
 		IDirect3DSurface9* surface9 = nullptr;
-		int width = 0;
-		int height = 0;
-		context->GetBackBufferSize(&width, &height);
-		context->GetDevice()->CreateDepthStencilSurface(width, height, m_format, m_multiSample, m_multisampleQuality, m_discard, &surface9, nullptr);
+		context->GetDevice()->CreateDepthStencilSurface(m_width, m_height, m_format, m_multiSample, m_multisampleQuality, m_discard, &surface9, nullptr);
 		return surface9;
 	}
 
@@ -78,6 +77,8 @@ public:
 	}
 
 private:
+	int m_width;
+	int m_height;
 	D3DFORMAT m_format;
 	D3DMULTISAMPLE_TYPE m_multiSample;
 	DWORD m_multisampleQuality;
@@ -151,6 +152,79 @@ private:
 	D3DPOOL m_pool;
 };
 
+class RenderTarget9Factory final : public IResource9Factory
+{
+public:
+	RenderTarget9Factory(int width, int height, D3DFORMAT format, D3DMULTISAMPLE_TYPE multiSample, DWORD multisampleQuality, BOOL lockable)
+		: m_width(width)
+		, m_height(height)
+		, m_format(format)
+		, m_multiSample(multiSample)
+		, m_multisampleQuality(multisampleQuality)
+		, m_lockable(lockable)
+	{
+
+	}
+
+	virtual IUnknown* Create(D3D9Context* context) const override
+	{
+		IDirect3DSurface9* surface9 = nullptr;
+		context->GetDevice()->CreateRenderTarget(
+			m_width,
+			m_height,
+			m_format,
+			m_multiSample,
+			m_multisampleQuality,
+			m_lockable,
+			&surface9,
+			nullptr);
+		return surface9;
+	}
+
+	virtual bool IsCreateInVideoMemory() const override
+	{
+		return true;
+	}
+
+	virtual std::string GetType() const override
+	{
+		return "RenderTarget";
+	}
+
+private:
+	int m_width;
+	int m_height;
+	D3DFORMAT m_format;
+	D3DMULTISAMPLE_TYPE m_multiSample;
+	DWORD m_multisampleQuality;
+	BOOL m_lockable;
+};
+
+class Sprite9Factory final : public IResource9Factory
+{
+public:
+	Sprite9Factory()
+	{
+
+	}
+
+	virtual IUnknown* Create(D3D9Context* context) const override
+	{
+		ID3DXSprite* sprite = nullptr;
+		D3DXCreateSprite(context->GetDevice(), &sprite);
+		return sprite;
+	}
+
+	virtual bool IsCreateInVideoMemory() const override
+	{
+		return true;
+	}
+
+	virtual std::string GetType() const override
+	{
+		return "Sprite";
+	}
+};
 
 D3D9Context::~D3D9Context()
 {
@@ -261,10 +335,10 @@ HRESULT D3D9Context::ResetDevice()
 			auto ptr = GetResource9(info.handle, nullptr); // internal will AddRef
 			ULONG refs = ptr->Release();
 			refs = ptr->Release();
+			assert(refs == 0);
 		}
 	}
 
-	CalcBackBufferSize();
 	D3DPRESENT_PARAMETERS d3dpp;
 	BuildD3DPresentParameters(d3dpp);
 	HRESULT hr = m_d3dDev9->Reset(&d3dpp);
@@ -337,7 +411,7 @@ Resource9Handle D3D9Context::CreateOffScreenSurface9(int width, int height, D3DF
 
 Resource9Handle D3D9Context::CreateZBufferSurface9(int width, int height, D3DFORMAT format, D3DMULTISAMPLE_TYPE multiSample, DWORD multisampleQuality, BOOL discard)
 {
-	auto factory = new ZBufferSurface9Factory(format, multiSample, multisampleQuality, discard);
+	auto factory = new ZBufferSurface9Factory(width, height, format, multiSample, multisampleQuality, discard);
 	auto ptr = factory->Create(this);
 	return LogResource(factory, ptr);
 }
@@ -381,5 +455,19 @@ void D3D9Context::RebuildResource9(Resource9Handle handle)
 	auto& info = m_resAllocated.at(handle);
 	auto newPtr = info.factory->Create(this);
 	info.pointer = newPtr;
+}
+
+Resource9Handle D3D9Context::CreateRenderTarget(int width, int height, D3DFORMAT format, D3DMULTISAMPLE_TYPE multiSample, DWORD multisampleQuality, BOOL lockable)
+{
+	auto factory = new RenderTarget9Factory(width, height, format, multiSample, multisampleQuality, lockable);
+	auto ptr = factory->Create(this);
+	return LogResource(factory, ptr);
+}
+
+Resource9Handle D3D9Context::CreateSprite()
+{
+	auto factory = new Sprite9Factory();
+	auto ptr = factory->Create(this);
+	return LogResource(factory, ptr);
 }
 
